@@ -26,5 +26,7 @@ defmodule RomanNumerals do
 
   @spec numeral(pos_integer) :: String.t()
   def numeral(number) do
+    @roman_numbers
+    |> Map.fetch!(number)
   end
 end
