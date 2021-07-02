@@ -4,28 +4,32 @@ defmodule RobotSimulator do
   @directions [:north, :east, :west, :south, nil]
   @invalid_direction {:error, "invalid direction"}
   @invalid_position {:error, "invalid position"}
+  @invalid_instruction {:error, "invalid instruction"}
+  @valid_instructions ["L", "R", "A"]
+  
+  @type t :: %__MODULE__{}
 
   @doc """
   Create a Robot Simulator given an initial direction and position.
 
   Valid directions are: `:north`, `:east`, `:south`, `:west`
   """
-  def create() do
-    %__MODULE__{}
+
+  defguard is_valid_position?(x, y) when is_integer(x) and is_integer(y)
+
+  def create(), do: %__MODULE__{}
+
+  def create(direction, _) when not (direction in @directions), do: @invalid_direction
+
+  @spec create(direction :: atom, position :: {integer, integer}) :: RobotSimulator.t()
+  def create(direction, {x, y}) when is_valid_position?(x, y) do
+    %__MODULE__{
+      direction: direction,
+      position: {x, y}
+    }
   end
 
-  @spec create(direction :: atom, position :: {integer, integer}) :: any
-  def create(direction \\ nil, position \\ nil) do
-    cond do
-      not(direction in @directions) -> @invalid_direction
-      not(is_valid_position?(position)) -> @invalid_position
-      true -> 
-        %__MODULE__{
-          direction: direction,
-          position: position
-        }
-    end
-  end
+  def create(_direction, _position), do: @invalid_position
 
   @doc """
   Simulate the robot's movement given a string of instructions.
@@ -35,9 +39,13 @@ defmodule RobotSimulator do
   @spec simulate(robot :: any, instructions :: String.t()) :: any
   def simulate(robot, instructions) do
     instructions
-    |> String.codepoints()
-    |> Enum.reduce(robot, fn i, r ->
-      exec_instruction(r, i)
+    |> String.split("", trim: true)
+    |> Enum.reduce_while(robot, fn i, r ->
+      if i in @valid_instructions do
+        {:cont, exec_instruction(r, i)}
+      else
+        {:halt, @invalid_instruction}
+      end
     end)
   end
 
@@ -59,37 +67,22 @@ defmodule RobotSimulator do
     robot.position
   end
 
-  def exec_instruction(robot, "A") do
+  def exec_instruction(robot, "A"), do: %{robot | position: advance(robot)}
+  def exec_instruction(robot, "L"), do: set_direction(robot, "L")
+  def exec_instruction(robot, "R"), do: set_direction(robot, "R")
+
+  def set_direction(robot, "L"), do: %{robot | direction: rotate(robot.direction, "L")}
+  def set_direction(robot, "R"), do: %{robot | direction: rotate(robot.direction, "R")}
+
+  def advance(robot) do
     [x, y] = Tuple.to_list(robot.position)
 
-    robot
-    |> struct(%{position: {x, y + 1}})
-  end
-
-  def exec_instruction(robot, "L") do
-    [x, y] = Tuple.to_list(robot.position)
-
-    set_direction(robot, "L")
-    |> set_position({y, x})
-  end
-
-  def exec_instruction(robot, "R") do
-    [x, y] = Tuple.to_list(robot.position)
-    set_direction(robot, "R")
-    |> set_position({y, x})
-  end
-
-  def set_direction(robot, direction) do
-    robot
-    |> struct(%{direction: rotate(robot.direction, direction)})
-  end
-
-  # Verificar o X e Y do robo
-  # Exemplo:
-  # Se Y(Direção) = West (Oeste) = (-x, y)
-  def set_position(robot, position) do
-    robot
-    |> struct(%{position: position})
+    case robot.direction do
+      :east -> {x + 1, y}
+      :west -> {x - 1, y}
+      :south -> {x, y - 1}
+      :north -> {x, y + 1}
+    end
   end
 
   def rotate(:north, direction) do
@@ -98,7 +91,7 @@ defmodule RobotSimulator do
       "R" -> :east
     end
   end
-  
+
   def rotate(:east, direction) do
     case direction do
       "L" -> :north
@@ -115,29 +108,8 @@ defmodule RobotSimulator do
 
   def rotate(:west, direction) do
     case direction do
-      "L" -> :south 
+      "L" -> :south
       "R" -> :north
-    end
-  end
-
-  def is_valid_position?(position) do  
-    cond do
-      is_tuple(position) -> 
-        all_numbers =
-          position
-          |> Tuple.to_list()
-          |> Enum.map(&is_integer/1)
-          |> Enum.all?()
-  
-      length = 
-        position
-        |> Tuple.to_list()
-        |> Enum.count()
-  
-      length == 2 and all_numbers
-  
-     true -> 
-      false
     end
   end
 end
