@@ -16,24 +16,22 @@ defmodule Markdown do
     |> Enum.map(&process/1)
     |> Enum.join()
     |> patch()
-
-    # patch(Enum.join(Enum.map(String.split(m, "\n"), fn t -> process(t) end)))
   end
 
-  defp process(t) do
-    t
+  defp process(item) do
+    item
     |> String.first()
     |> case do
       "#" ->
-        t
+        item
         |> parse_header_md_level()
         |> enclose_with_header_tag()
 
       "*" ->
-        parse_list_md_level(t)
+        parse_list_md_level(item)
 
       _ ->
-        t
+        item
         |> String.split()
         |> enclose_with_paragraph_tag()
     end
@@ -51,11 +49,23 @@ defmodule Markdown do
 
   defp parse_header_md_level(hwt) do
     [h | t] = String.split(hwt)
-    {to_string(String.length(h)), Enum.join(t, " ")}
+
+    a =
+      h
+      |> String.length()
+      |> to_string()
+
+    b = Enum.join(t, " ")
+
+    {a, b}
   end
 
-  defp parse_list_md_level(l) do
-    t = String.split(String.trim_leading(l, "* "))
+  defp parse_list_md_level(level) do
+    t =
+      level
+      |> String.trim_leading("* ")
+      |> String.split()
+
     "<li>" <> join_words_with_tags(t) <> "</li>"
   end
 
@@ -71,15 +81,12 @@ defmodule Markdown do
     t
     |> Enum.map(fn w -> replace_md_with_tag(w) end)
     |> Enum.join(" ")
-
-    # Enum.join(Enum.map(t, fn w -> replace_md_with_tag(w) end), " ")
   end
 
-  defp replace_md_with_tag(w) do
-    replace_prefix_md(w)
+  defp replace_md_with_tag(word) do
+    word
+    |> replace_prefix_md()
     |> replace_suffix_md()
-
-    # replace_suffix_md(replace_prefix_md(w))
   end
 
   defp replace_prefix_md(w) do
@@ -90,11 +97,11 @@ defmodule Markdown do
     end
   end
 
-  defp replace_suffix_md(w) do
+  defp replace_suffix_md(word) do
     cond do
-      w =~ ~r/#{"__"}{1}$/ -> String.replace(w, ~r/#{"__"}{1}$/, "</strong>")
-      w =~ ~r/[^#{"_"}{1}]/ -> String.replace(w, ~r/_/, "</em>")
-      true -> w
+      word =~ ~r/#{"__"}{1}$/ -> String.replace(word, ~r/#{"__"}{1}$/, "</strong>")
+      word =~ ~r/[^#{"_"}{1}]/ -> String.replace(word, ~r/_/, "</em>")
+      true -> word
     end
   end
 
