@@ -15,7 +15,7 @@ defmodule BankAccount do
   """
   @spec open_bank() :: account
   def open_bank() do
-    {:ok, pid} = Agent.start_link(fn -> %{balance: 0} end, name: __MODULE__)
+    {:ok, pid} = Agent.start_link(fn -> %{balance: 0} end)
     pid
   end
 
@@ -24,7 +24,7 @@ defmodule BankAccount do
   """
   @spec close_bank(account) :: none
   def close_bank(account) do
-    Process.exit(account, :normal)
+    Agent.stop(account)
   end
 
   @doc """
@@ -32,12 +32,11 @@ defmodule BankAccount do
   """
   @spec balance(account) :: integer
   def balance(account) do
-    Process.alive?(account) |> IO.inspect(label: "LALALA")
-    #if Process.alive?(account) do
-    #  Agent.get(account, fn b -> b.balance end)
-    #else
-    #  {:error, :account_closed}
-    #end
+    if Process.alive?(account) do
+      Agent.get(account, fn b -> b.balance end)
+    else
+      {:error, :account_closed}
+    end
   end
 
   @doc """
