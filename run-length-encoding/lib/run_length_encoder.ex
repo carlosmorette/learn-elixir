@@ -30,6 +30,27 @@ defmodule RunLengthEncoder do
   end
 
   @spec decode(String.t()) :: String.t()
-  def decode(string) do
+  def decode(""), do: ""
+
+  def decode(<<char::utf8, rest::binary>>) do
+    if Regex.match?(~r/[a-zA-Z\s]/, <<char::utf8>>) do
+      <<char::utf8>> <> decode(rest)
+    else
+      read_number(<<char::utf8>>, rest)
+    end
+  end
+
+  def read_number(acc, <<char::utf8, rest::binary>>) do
+    if Regex.match?(~r/[a-zA-Z\s]/, <<char::utf8>>) do
+      acc
+      |> String.to_integer()
+      |> decode_count(<<char::utf8>>, rest)
+    else
+      read_number(acc <> <<char::utf8>>, rest)
+    end
+  end
+
+  def decode_count(number, char, rest) do
+    String.duplicate(char, number) <> decode(rest)
   end
 end
