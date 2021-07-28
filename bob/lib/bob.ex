@@ -1,5 +1,4 @@
 defmodule Bob do
-  
   # Bob é um adolescente indiferente. Na conversa, suas respostas são muito limitadas.
   # Bob responde 'Claro'. se você perguntar a ele.
   # Ele responde 'Whoa, chill out!' se você gritar com ele.
@@ -8,7 +7,7 @@ defmodule Bob do
   # Ele responde 'tanto faz'. para qualquer outra coisa.
 
   def is_question?(input) do
-    input 
+    input
     |> String.trim()
     |> String.last()
     |> case do
@@ -22,7 +21,8 @@ defmodule Bob do
   end
 
   def is_silence?(input) do
-    is_question = input =~ ~r/\?/ 
+    is_question = input =~ ~r/\?/
+
     if is_question do
       false
     else

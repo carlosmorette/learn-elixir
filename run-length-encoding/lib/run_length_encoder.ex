@@ -10,19 +10,19 @@ defmodule RunLengthEncoder do
 
   @spec encode(String.t()) :: String.t()
   def encode(<<char::utf8, rest::binary>>) do
-    encode_reduce(1, char, rest) 
+    encode_reduce(1, char, rest)
   end
 
   def encode_count(1), do: ""
 
   def encode_count(n), do: Integer.to_string(n)
 
-  def encode_reduce(count, last_char, "") do 
+  def encode_reduce(count, last_char, "") do
     encode_count(count) <> <<last_char::utf8>>
   end
 
   def encode_reduce(count, char, <<char::utf8, rest::binary>>) do
-    encode_reduce(count + 1, char, rest) 
+    encode_reduce(count + 1, char, rest)
   end
 
   def encode_reduce(count, last_char, <<char::utf8, rest::binary>>) do

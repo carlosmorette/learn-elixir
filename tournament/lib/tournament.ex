@@ -11,20 +11,19 @@ defmodule Tournament do
   listing the teams in alphabetical order.
   """
   @spec tally(input :: list(String.t())) :: String.t()
-  def tally(input) do 
-    teams = 
+  def tally(input) do
+    teams =
       input
       |> Enum.map(&String.split(&1, ";"))
-      |> Enum.reduce([], fn match, acc -> 
+      |> Enum.reduce([], fn match, acc ->
         [team1, team2, _] = match
         [initial_team_line(team1), initial_team_line(team2) | acc]
       end)
       |> Enum.reduce([], &reduce_fun/2)
-  
 
     input
     |> Enum.map(&String.split(&1, ";"))
-    |> Enum.reduce([], fn match, acc -> 
+    |> Enum.reduce([], fn match, acc ->
       [team1, team2, result] = match
 
       winner = find_team_by_name(team1, teams)
@@ -36,7 +35,7 @@ defmodule Tournament do
   end
 
   def set_team_match(team1, team2, result) do
-    {tm1, tm2} = 
+    {tm1, tm2} =
       case result do
         "win" -> {:won, :loss}
         "loss" -> {:loss, :won}
@@ -78,7 +77,7 @@ defmodule Tournament do
     |> Map.merge(%{matches_drawn: 1}, fn _kv, v1, v2 -> v1 + v2 end)
   end
 
-  def reduce_fun(team, acc), do: unless team in acc, do: [team | acc], else: acc
+  def reduce_fun(team, acc), do: unless(team in acc, do: [team | acc], else: acc)
 
   def initial_team_line(team_name) do
     %{

@@ -6,7 +6,9 @@ defmodule BeerSong do
   def verse(number) do
     """
     #{start(number)} of beer on the wall,#{parse(number, :space_start)} #{bottles(number)} of beer.
-    #{phrase(number)}, #{if number == 0, do: "99 ", else: parse(number - 1, :space_end)}#{bottles(number - 1)} of beer on the wall.
+    #{phrase(number)}, #{if number == 0, do: "99 ", else: parse(number - 1, :space_end)}#{
+      bottles(number - 1)
+    } of beer on the wall.
     """
   end
 
@@ -22,11 +24,9 @@ defmodule BeerSong do
 
   def phrase(n), do: "Take #{pronoun(n)} down and pass it around"
 
-
   def pronoun(1), do: "it"
 
   def pronoun(_), do: "one"
-
 
   def parse(0, _), do: nil
 
@@ -36,11 +36,10 @@ defmodule BeerSong do
 
   def parse(n, :space_end), do: "#{n} "
 
-
   def bottles(1), do: "bottle"
 
   def bottles(0), do: "no more bottles"
-  
+
   def bottles(_), do: "bottles"
 
   @doc """

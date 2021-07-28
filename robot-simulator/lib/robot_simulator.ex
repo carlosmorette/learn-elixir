@@ -6,7 +6,7 @@ defmodule RobotSimulator do
   @invalid_position {:error, "invalid position"}
   @invalid_instruction {:error, "invalid instruction"}
   @valid_instructions ["L", "R", "A"]
-  
+
   @type t :: %__MODULE__{}
 
   @doc """
