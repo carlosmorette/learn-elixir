@@ -5,32 +5,34 @@ defmodule ProteinTranslation do
 
   @spec of_rna(String.t()) :: {atom, list(String.t())}
 
+  @max_list_of_proteins 3
+
   def of_rna(rna) do
-    list_proteins = 
-      rna    
-      |> String.codepoints
+    list_proteins =
+      rna
+      |> String.codepoints()
       |> Enum.chunk_every(3)
       |> Enum.map(&Enum.join/1)
       |> Enum.reduce_while([], &reduce_fun/2)
 
     case list_proteins do
-      ["invalid RNA"] -> {:error, "invalid RNA"}  
+      ["invalid RNA"] -> {:error, "invalid RNA"}
       _ -> {:ok, list_proteins}
     end
   end
 
   def reduce_fun(codon, acc) do
-    if Enum.count(acc) == 3 do
+    if Enum.count(acc) == @max_list_of_proteins do
       {:cont, acc}
     else
-     codon
-     |> of_codon()
-     |> (&elem(&1, 1)).()
-     |> case do
-       "STOP" -> {:halt, acc}
-       "invalid RNA" -> {:halt, ["invalid RNA"]}
-       result -> {:cont, acc ++ [result]}
-     end
+      codon
+      |> of_codon()
+      |> (&elem(&1, 1)).()
+      |> case do
+        "STOP" -> {:halt, acc}
+        "invalid RNA" -> {:halt, ["invalid RNA"]}
+        result -> {:cont, acc ++ [result]}
+      end
     end
   end
 
@@ -56,8 +58,8 @@ defmodule ProteinTranslation do
   UGA -> STOP
   """
   @spec of_codon(String.t()) :: {atom, String.t()}
-  def of_codon("INVALID"), do: {:error, "invalid codon"}  
-  
+  def of_codon("INVALID"), do: {:error, "invalid codon"}
+
   def of_codon(codon), do: {:ok, aux_of_codon(codon)}
 
   def aux_of_codon(codon) when codon in ["UGU", "UGC"], do: "Cysteine"
