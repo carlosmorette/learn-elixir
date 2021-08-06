@@ -58,7 +58,7 @@ defmodule RailFenceCipherTest do
     assert RailFenceCipher.decode("ABCDEFGHIJKLMNOP", 1) == "ABCDEFGHIJKLMNOP"
   end
 
-  @tag :pending
+  # @tag :pending
   test "decode letters of less than rails" do
     assert RailFenceCipher.decode("More rails than letters", 24) == "More rails than letters"
   end

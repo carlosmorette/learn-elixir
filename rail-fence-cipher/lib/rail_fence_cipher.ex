@@ -10,30 +10,39 @@ defmodule RailFenceCipher do
   def encode(str, rails) do
     str
     |> to_charlist()
-    |> Enum.reduce([%{}, 1, false], fn char, [acc, current_row, bool] -> 
+    |> Enum.reduce([%{}, 1, false], fn char, [acc, current_row, can_up] ->
       if current_row < rails do
-        if bool and current_row != 1 do
-          new = Map.merge(acc, %{current_row => <<char>>}, fn _k, v1, v2 -> v1 <> v2 end)
-          [new, current_row - 1, true]
+        if can_up and current_row != 1 do
+          [set_row(acc, current_row, char), current_row - 1, true]
         else
-          new = Map.merge(acc, %{current_row => <<char>>}, fn _k, v1, v2 -> v1 <> v2 end)
-          [new, current_row + 1, false]
+          [set_row(acc, current_row, char), current_row + 1, false]
         end
       else
-        new = Map.merge(acc, %{current_row => <<char>>}, fn _k, v1, v2 -> v1 <> v2 end)
-        [new, current_row - 1, true]
+        [set_row(acc, current_row, char), current_row - 1, true]
       end
     end)
     |> Enum.at(0)
     |> Enum.reduce("", fn {_row, str}, acc -> acc <> str end)
   end
 
-  # [{"asd"}, {"asd"}, {"sdffsd"}]
+  def set_row(acc, current_row, char) do
+    Map.merge(acc, %{current_row => <<char>>}, &concat_str/3)
+  end
+
+  def concat_str(_, v1, v2), do: v1 <> v2
 
   @doc """
   Decode a given rail fence ciphertext to the corresponding plaintext
   """
   @spec decode(String.t(), pos_integer) :: String.t()
-  def decode(_str, _rails) do
+  def decode("", _), do: ""
+
+  def decode(str, 1), do: str
+
+  def decode(str, rails) do
+    if String.length(str) == rails - 1 do
+      str
+    else
+    end
   end
 end
