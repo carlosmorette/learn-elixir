@@ -16,25 +16,34 @@ defmodule PigLatin do
 
   @vowels ["a", "e", "i", "o", "u"]
 
-  @exceptions ["x", "y"]
+  @exceptions_cons ["x", "y"]
+
+  defguard is_exception?(char, pos) when <<char>> in @exceptions_cons and <<pos>> not in @vowels
 
   @spec translate(phrase :: String.t()) :: String.t()
   def translate(<<char::utf8, rest::binary>>) when <<char>> in @vowels do
     <<char>> <> rest <> "ay"
   end
 
-  defguard is_exception?(char, pos) when <<char>> in @exceptions and <<pos>> not in @vowels
+  # Specific cases
+  def translate(<<"q", "u", rest::binary>>) do
+    rest <> "quay"
+  end
+
+  def translate(<<"s", "q", "u", rest::binary>>) do
+    rest <> "squay"
+  end
 
   def translate(<<char::utf8, pos::utf8, rest::binary>>) when is_exception?(char, pos) do
-    <<char>> <> rest <> "ay"
+    <<char>> <> <<pos>> <> rest <> "ay"
   end
 
   def translate(<<char::utf8, rest::binary>>) do
-    reduce_translate("", <<char>> <> rest)
+    reduce_translate("", <<char>> <> rest) <> "ay"
   end
 
   def reduce_translate(acc, <<char::utf8, rest::binary>>) when <<char>> in @vowels do
-    <<char>> <> rest <> acc <> "ay"
+    <<char>> <> rest <> acc
   end
 
   def reduce_translate(acc, <<char::utf8, rest::binary>>) do
