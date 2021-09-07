@@ -23,15 +23,22 @@ defmodule CryptoSquare do
     |> Enum.find(&is_valid_row?(&1, length))
     |> case do
       nil -> 
-        capture_row(padding_str <> "  ")
+        if String.ends_with?(padding_str, "  ") do
+          padding_str
+          |> String.trim()
+          |> Kernel.<>(" ")
+          |> capture_row()
+        else
+          capture_row(padding_str <> "  ")
+        end
 
       rows -> 
           columns = calculate_column(length, rows)
-          transform(padding_str, rows, columns)
+          make_square(padding_str, rows, columns)
       end
   end
 
-  def transform(str, rows, columns) do
+  def make_square(str, rows, columns) do
     str
     |> String.graphemes()
     |> Enum.chunk_every(columns)
@@ -54,7 +61,6 @@ defmodule CryptoSquare do
           acc ++ [character]
         end)
         |> Enum.join()
-        |> String.trim()
 
       scroll_columns(enum, 
         rows, 
@@ -82,12 +88,13 @@ defmodule CryptoSquare do
   def normalize(str) do
     str
     |> String.downcase()
-    |> String.replace(["!", ",", " ", "'", "."], "")
+    |> String.replace(["!", ",", " ", "'", ".", "@", "%"], "")
   end
 
   def is_valid_row?(number, length) do
     column = (length / number)
     diff = (column - number)
+
     round(column) == column and diff <= 1 and diff >= 0
   end
 end
