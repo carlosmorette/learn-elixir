@@ -12,35 +12,35 @@ defmodule CryptoSquare do
   def encode(str) do
     str
     |> normalize() 
-    |> compute() 
+    |> capture_row() 
   end
 
-  def compute(str) do
-    padding_str = padding_fun(str)
-    length = String.length(padding_str)
+  def capture_row(str) do
+    {padding_str, length} = padding_str(str)
 
-    rows = 
-      1..10
-      |> Enum.into([])
-      |> Enum.filter(fn n -> filter(n, length) end)
-      |> Enum.at(0)
+    1..10
+    |> Enum.into([])
+    |> Enum.find(&is_valid_row?(&1, length))
+    |> case do
+      nil -> 
+        capture_row(padding_str <> "  ")
 
-    columns = calculate_column(length, rows)
-
-    if rows do
-      padding_str
-      |> String.graphemes()
-      |> Enum.chunk_every(columns)
-      |> reduce_fun(rows, columns, 0, [])
-      #|> Enum.join(" ")
-      #|> String.trim()
-    else
-      compute(str <> "  ")
-    end
+      rows -> 
+          columns = calculate_column(length, rows)
+          transform(padding_str, rows, columns)
+      end
   end
 
-  def reduce_fun(enum, rows, column, curr_column, res) do
-    if curr_column == (column - 1) do
+  def transform(str, rows, columns) do
+    str
+    |> String.graphemes()
+    |> Enum.chunk_every(columns)
+    |> scroll_columns(rows, columns, 0, [])
+    |> Enum.join(" ")
+  end
+
+  def scroll_columns(enum, rows, columns, curr_column, res) do
+    if curr_column == columns do
       res
     else
       result =
@@ -54,24 +54,25 @@ defmodule CryptoSquare do
           acc ++ [character]
         end)
         |> Enum.join()
+        |> String.trim()
 
-      IO.inspect(enum, label: "enum...")
-      IO.inspect(result, label: "result...")
-      IO.inspect(res, label: "res...")
-
-      reduce_fun(enum, 
+      scroll_columns(enum, 
         rows, 
-        column, 
+        columns, 
         curr_column + 1, 
         res ++ [result]
       )
     end
   end
   
-  def padding_fun(str) do
+  def padding_str(str) do
     length = String.length(str)
-    is_pair = rem(length, 2) != 0
-    if is_pair, do: str, else: str <> "  "
+    is_pair = rem(length, 2) == 0
+    if is_pair do
+      {str, length}
+    else
+      {str <> " ", length}
+    end
   end
 
   def calculate_column(length, rows) do
@@ -81,15 +82,13 @@ defmodule CryptoSquare do
   def normalize(str) do
     str
     |> String.downcase()
-    |> String.replace(["!", ",", " "], "")
+    |> String.replace(["!", ",", " ", "'", "."], "")
   end
 
-  def filter(number, length) do
+  def is_valid_row?(number, length) do
     column = (length / number)
     diff = (column - number)
-    int_column = round(column)
-
-    int_column == column and diff <= 1 and diff > 0
+    round(column) == column and diff <= 1 and diff >= 0
   end
 end
 
