@@ -33,11 +33,8 @@ defmodule PhoneNumber do
       number(:only_digits)
     else
       number
-      |> then(fn number ->
-          number
-          |> String.length()
-          |> do_number(number)
-      end)
+      |> String.length()
+      |> do_number(number)
     end
   end
 
