@@ -14,8 +14,16 @@ defmodule FlattenArray do
 
   @spec flatten(list) :: list
   def flatten(list) do
-    list
-    |> List.flatten()
-    |> Enum.filter(& &1)
+    do_flatten(list, [])
+  end
+
+  def do_flatten(item, acc_param) do
+    Enum.reduce(item, acc_param, fn item, acc ->
+      case item do
+        nil -> acc
+        x when is_list(x) -> do_flatten(item, acc)
+        x -> acc ++ [x]
+      end
+    end)
   end
 end
