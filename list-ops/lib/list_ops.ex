@@ -5,58 +5,63 @@ defmodule ListOps do
   # for adding numbers), but please do not use Kernel functions for Lists like
   # `++`, `--`, `hd`, `tl`, `in`, and `length`.
 
-  @doc """
-  Suponhamos que seu input seja [1, 2, 3, 4]
-  
-  O que vai acontecer aqui é:
-  Ele vai pegar a cauda da lista que é [2, 3, 4] e chamar a função novamente
-  O primeiro input seria +1. Isso vai acontecer até chegar o último elemento da lista.
-  Quando isso acontecer será chamada a função count/1 que da match com uma lista vazia.
-  Sendo isso será retornad: valor_acumulado + 0
-  Totalizando 4
-  """
-  @spec count(list) :: non_neg_integer
-  def count([]), do: 0
+  @spec length(list) :: non_neg_integer
+  def length(l), do: do_length(l, 0)
 
-  def count([_head | tail]), do: 1 + count(tail)
+  def do_length([], acc), do: acc
   
-  @doc """
-  Input: [1, 2, 3, 4]
-  
-  Aqui nós sempre pegamos a cabeça da lista e colocamos ela na frente, 
-  até a cabeça da lista ser o último item.
+  def do_length([_head | tail], acc), do: do_length(tail, acc + 1)
 
-  Ordem:
-  [1]
-  [2, 1]
-  [3, 2, 1]
-  [4, 3, 2, 1]
-  """
   @spec reverse(list) :: list
-  def reverse(list), do: reverse_reduce(list, [])
+  def reverse(l), do: do_reverse(l, [])
 
-  def reverse_reduce([head | tail], acc), do: reverse_reduce(tail, [head | acc])
+  def do_reverse([], acc), do: acc
 
-  def reverse_reduce([], acc), do: acc
-
+  def do_reverse([head | tail], acc), do: do_reverse(tail, [head | acc])
+    
   @spec map(list, (any -> any)) :: list
-  def map(l, f) do
-  end
+  def map(l, f), do: do_map(l, f, [])
+
+  def do_map([], _f, acc), do: acc
+
+  def do_map([head | tail], f, acc), do: do_map(tail, f, acc ++ [f.(head)])
 
   @spec filter(list, (any -> as_boolean(term))) :: list
-  def filter(l, f) do
+  def filter(l, f), do: do_filter(l, f, [])
+
+  def do_filter([], _f, acc), do: acc
+
+  def do_filter([head | tail], f, acc) do
+    if f.(head) do 
+      do_filter(tail, f, acc ++ [head]) 
+    else 
+      do_filter(tail, f, acc)
+    end
   end
 
   @type acc :: any
-  @spec reduce(list, acc, (any, acc -> acc)) :: acc
-  def reduce(l, acc, f) do
+  @spec foldl(list, acc, (any, acc -> acc)) :: acc
+  def foldl(l, acc, f), do: do_foldl(l, f, acc)
+
+  def do_foldl([], _f, acc), do: acc
+
+  def do_foldl([head | tail], f, acc), do: do_foldl(tail, f, f.(acc, head))
+
+  @spec foldr(list, acc, (any, acc -> acc)) :: acc
+  def foldr(l, acc, f) do
   end
 
   @spec append(list, list) :: list
-  def append(a, b) do
-  end
+  def append(a, b), do: do_append(a, b)
+
+  def do_append(acc, []), do: acc
+
+  def do_append(a, [head | tail]), do: do_append(a ++ [head], tail)
 
   @spec concat([[any]]) :: [any]
-  def concat(ll) do
-  end
+  def concat([]), do: []
+
+  def concat(ll), do: do_concat(ll, [])
+
+  def do_concat([head | tail], acc), do: do_concat(tail, acc ++ [List.flatten(head)])
 end
