@@ -9,7 +9,7 @@ defmodule ListOps do
   def length(l), do: do_length(l, 0)
 
   def do_length([], acc), do: acc
-  
+
   def do_length([_head | tail], acc), do: do_length(tail, acc + 1)
 
   @spec reverse(list) :: list
@@ -18,7 +18,7 @@ defmodule ListOps do
   def do_reverse([], acc), do: acc
 
   def do_reverse([head | tail], acc), do: do_reverse(tail, [head | acc])
-    
+
   @spec map(list, (any -> any)) :: list
   def map(l, f), do: do_map(l, f, [])
 
@@ -32,9 +32,9 @@ defmodule ListOps do
   def do_filter([], _f, acc), do: acc
 
   def do_filter([head | tail], f, acc) do
-    if f.(head) do 
-      do_filter(tail, f, acc ++ [head]) 
-    else 
+    if f.(head) do
+      do_filter(tail, f, acc ++ [head])
+    else
       do_filter(tail, f, acc)
     end
   end
@@ -45,11 +45,14 @@ defmodule ListOps do
 
   def do_foldl([], _f, acc), do: acc
 
-  def do_foldl([head | tail], f, acc), do: do_foldl(tail, f, f.(acc, head))
+  def do_foldl([head | tail], f, acc), do: do_foldl(tail, f, f.(head, acc))
 
   @spec foldr(list, acc, (any, acc -> acc)) :: acc
-  def foldr(l, acc, f) do
-  end
+  def foldr(l, acc, f), do: do_foldr(reverse(l), f, acc)
+
+  def do_foldr([], _f, acc), do: acc
+
+  def do_foldr([head | tail], f, acc), do: do_foldr(tail, f, f.(head, acc))
 
   @spec append(list, list) :: list
   def append(a, b), do: do_append(a, b)
@@ -63,5 +66,7 @@ defmodule ListOps do
 
   def concat(ll), do: do_concat(ll, [])
 
-  def do_concat([head | tail], acc), do: do_concat(tail, acc ++ [List.flatten(head)])
+  def do_concat([], acc), do: acc
+
+  def do_concat([head | tail], acc), do: do_concat(tail, acc ++ head)
 end
